@@ -1,0 +1,2 @@
+digExtractor>=0.2.0
+landmark_extractor

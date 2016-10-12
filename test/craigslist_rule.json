@@ -1,0 +1,11 @@
+[
+    {
+      "rule_type": "ItemRule",
+      "removehtml": true,
+      "strip_end_regex": "\\</time\\>",
+      "begin_regex": "\"postinginfo\\s+reveal\"\\>posted.*?:\\s+\\<time\\s+class=\".*?timeago\"\\s+datetime=\".*?\"\\>",
+      "end_regex": "\\</time\\>",
+      "include_end_regex": true,
+      "name": "posting_date"
+    }
+]
