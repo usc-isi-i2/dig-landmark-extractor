@@ -1,2 +1,2 @@
-digExtractor>=0.2.0
+digExtractor>=0.2.5
 landmark_extractor

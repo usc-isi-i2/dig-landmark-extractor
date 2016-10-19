@@ -3,19 +3,17 @@
 and outputs tokens that exist in a user provided trie"""
 import copy
 
-from itertools import ifilter
-from itertools import tee
-from itertools import chain
-from itertools import izip
 from digExtractor.extractor import Extractor
-from landmark_extractor.extraction.Landmark import Rule
+from landmark_extractor.extraction.Landmark import Rule, RuleSet
 from landmark_extractor.extraction.Landmark import flattenResult
+
 
 class DigLandmarkExtractor(Extractor):
 
     def __init__(self):
         self.renamed_input_fields = 'html'
         self.rule = None
+        self.rule_set = None
 
     def get_rule(self):
         return self.rule
@@ -26,10 +24,24 @@ class DigLandmarkExtractor(Extractor):
         self.rule = rule
         return self
 
+    def get_rule_set(self):
+        return self.rule_set
+
+    def set_rule_set(self, rule_set):
+        if not isinstance(rule_set, RuleSet):
+            raise ValueError("rule_set must be a RuleSet")
+        self.rule_set = rule_set
+        return self
+
     def extract(self, doc):
-            extracts = list()
+        if self.rule is not None:
             html = doc['html']
             result = self.rule.apply(html)
+            result = flattenResult(result)
+            return result
+        elif self.rule_set is not None:
+            html = doc['html']
+            result = self.rule_set.extract(html)
             result = flattenResult(result)
             return result
 
