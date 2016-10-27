@@ -7,16 +7,16 @@
       "end_regex": "li\\s+class=\"crumb\\s+section",
       "include_end_regex": true,
       "visible_chunk_before": "CL",
-      "name": "location"
+      "name": "location_org"
     },
     {
       "rule_type": "ItemRule",
       "removehtml": true,
       "strip_end_regex": "\\</time\\>",
-      "begin_regex": "\"postinginfo\\s+reveal\"\\>Posted.*?:\\s+\\<time\\s+class=\".*?timeago\"\\s+datetime=\".*?\"\\>",
+      "begin_regex": "\"postinginfo\\s+reveal\"\\>posted.*?:\\s+\\<time\\s+class=\".*?timeago\"\\s+datetime=\".*?\"\\>",
       "end_regex": "\\</time\\>",
       "include_end_regex": true,
-      "name": "posting_date"
+      "name": "posting_date_org"
     },
     {
       "rule_type": "ItemRule",
@@ -26,7 +26,7 @@
       "end_regex": "\\</span\\>\\<small",
       "include_end_regex": true,
       "visible_chunk_before": "favorite this post",
-      "name": "inferlink_text"
+      "name": "inferlink_text_org"
     },
     {
       "rule_type": "ItemRule",
@@ -37,7 +37,7 @@
       "visible_chunk_after": ")",
       "include_end_regex": true,
       "visible_chunk_before": "(",
-      "name": "location"
+      "name": "location_org"
     },
     {
       "rule_type": "ItemRule",
@@ -46,7 +46,7 @@
       "begin_regex": "id=\"postingbody\"\\>",
       "end_regex": "\\</section\\>\\s+\\<ul",
       "include_end_regex": true,
-      "name": "inferlink_text"
+      "name": "inferlink_text_org"
     },
     {
       "rule_type": "ItemRule",
@@ -56,7 +56,68 @@
       "end_regex": "postinginfo\"\\>\\<a\\s+href",
       "include_end_regex": true,
       "visible_chunk_before": "posted",
-      "name": "posting_date"
+      "name": "posting_date_org"
+    }
+  ],
+"craigslist.com": [
+    {
+      "rule_type": "ItemRule",
+      "removehtml": true,
+      "strip_end_regex": "li\\s+class=\"crumb\\s+section",
+      "begin_regex": "a\\s+href=\"/\"",
+      "end_regex": "li\\s+class=\"crumb\\s+section",
+      "include_end_regex": true,
+      "visible_chunk_before": "CL",
+      "name": "location_com"
+    },
+    {
+      "rule_type": "ItemRule",
+      "removehtml": true,
+      "strip_end_regex": "\\</time\\>",
+      "begin_regex": "\"postinginfo\\s+reveal\"\\>posted.*?:\\s+\\<time\\s+class=\".*?timeago\"\\s+datetime=\".*?\"\\>",
+      "end_regex": "\\</time\\>",
+      "include_end_regex": true,
+      "name": "posting_date_com"
+    },
+    {
+      "rule_type": "ItemRule",
+      "removehtml": true,
+      "strip_end_regex": "\\</span\\>\\<small",
+      "begin_regex": "\"\\>\\s+\\<span\\s+id=.*?\"titletextonly\"\\>",
+      "end_regex": "\\</span\\>\\<small",
+      "include_end_regex": true,
+      "visible_chunk_before": "favorite this post",
+      "name": "inferlink_text_com"
+    },
+    {
+      "rule_type": "ItemRule",
+      "removehtml": true,
+      "strip_end_regex": "\\)",
+      "begin_regex": "\\</span\\>\\<small.*?\\>\\s+\\(",
+      "end_regex": "\\)",
+      "visible_chunk_after": ")",
+      "include_end_regex": true,
+      "visible_chunk_before": "(",
+      "name": "location_com"
+    },
+    {
+      "rule_type": "ItemRule",
+      "removehtml": true,
+      "strip_end_regex": "\\</section\\>\\s+\\<ul",
+      "begin_regex": "id=\"postingbody\"\\>",
+      "end_regex": "\\</section\\>\\s+\\<ul",
+      "include_end_regex": true,
+      "name": "inferlink_text_com"
+    },
+    {
+      "rule_type": "ItemRule",
+      "removehtml": true,
+      "strip_end_regex": "postinginfo\"\\>\\<a\\s+href",
+      "begin_regex": "class=\"postinginfo\\s+reveal\"\\>posted",
+      "end_regex": "postinginfo\"\\>\\<a\\s+href",
+      "include_end_regex": true,
+      "visible_chunk_before": "posted",
+      "name": "posting_date_com"
     }
 ]
 }

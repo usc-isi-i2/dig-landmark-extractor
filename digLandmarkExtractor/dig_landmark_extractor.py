@@ -40,9 +40,19 @@ class DigLandmarkExtractor(Extractor):
             result = flattenResult(result)
             return result
         elif self.rule_set is not None:
+            result = dict()
             html = doc['html']
-            result = self.rule_set.extract(html)
-            result = flattenResult(result)
+            for rule in self.rule_set.rules:
+                rule_result = rule.apply(html)
+                rule_result = flattenResult(rule_result)
+                if rule_result:
+                    if rule.name not in result:
+                        result[rule.name] = rule_result
+                    elif isinstance(result[rule.name], list):
+                        result[rule.name].append(rule_result)
+                    else:
+                        result[rule.name] = [result[rule.name], rule_result]
+
             return result
 
     def get_metadata(self):

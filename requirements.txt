@@ -1,2 +1,3 @@
 digExtractor>=0.2.5
 landmark_extractor
+tldextract

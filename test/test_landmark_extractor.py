@@ -5,12 +5,21 @@ import codecs
 import unittest
 
 import json
+import tldextract
+
 from digLandmarkExtractor.dig_landmark_extractor import DigLandmarkExtractor
 from digExtractor.extractor_processor import ExtractorProcessor
 from landmark_extractor.extraction.Landmark import RuleSet
-from digLandmarkExtractor.get_landmark_extractor_processors\
-    import get_landmark_extractor_processors, get_landmark_extractor_processor_for_rule_set
+from digLandmarkExtractor.get_landmark_extractor_processors import get_landmark_extractor_processors
+from digLandmarkExtractor.get_landmark_extractor_processors import get_landmark_extractor_processor_for_rule_set
+from digLandmarkExtractor.get_landmark_extractor_processors import get_multiplexing_landmark_extractor_processor
 from digExtractor.extractor_processor_chain import execute_processor_chain
+
+
+def extract_domain_and_suffix(url):
+    result = tldextract.extract(url)
+    return result.domain + '.' + result.suffix
+
 
 class TestDigLandmarkExtractor(unittest.TestCase):
 
@@ -89,6 +98,27 @@ class TestDigLandmarkExtractor(unittest.TestCase):
         self.assertEquals(updated_doc['location'][1]['value'], 'Bend')
         self.assertEquals(updated_doc['location'][1]['original_output_field'],
                           'location-2')
+
+
+    def test_dig_multiplexing_landmark_extractor(self):
+        rules = self.load_json_file("tld_craigslist_rules.json")
+        html = self.load_file("craigslist_ad.html")
+        doc1 = {"foo": html, "url": "http://bend.craigslist.org/snw/5771300137.html"}
+        doc2 = {"foo": html, "url": "http://bend.craigslist.com/snw/5771300137.html"}
+        rule_sets = dict()
+        for key, value in rules.iteritems():
+            rule_sets[key] = RuleSet(value)
+        ep = get_multiplexing_landmark_extractor_processor(rule_sets,
+                                                           ['foo', 'url'],
+                                                           extract_domain_and_suffix,
+                                                           None)
+        updated_doc1 = execute_processor_chain(doc1, [ep])
+        updated_doc2 = execute_processor_chain(doc2, [ep])
+
+        self.assertEquals(updated_doc1['posting_date_org'][0]['value'],
+                          '2016-09-07 5:57pm')
+        self.assertEquals(updated_doc2['posting_date_com'][0]['value'],
+                          '2016-09-07 5:57pm')
 
 
 if __name__ == '__main__':
