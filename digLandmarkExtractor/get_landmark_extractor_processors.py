@@ -6,7 +6,8 @@ from digLandmarkExtractor.dig_multiplexing_landmark_extractor import DigMultiple
 def get_multiplexing_landmark_extractor_processor(rule_sets,
                                                   input_fields,
                                                   selector_function,
-                                                  output_fields=None):
+                                                  output_fields=None,
+                                                  include_context=False):
     if output_fields is None:
         output_fields = set()
         for key, rule_set in rule_sets.iteritems():
@@ -18,11 +19,13 @@ def get_multiplexing_landmark_extractor_processor(rule_sets,
         extractor.set_rule_set(rule_set)
         extractor.set_metadata({"extractor": "landmark"})
         extractors[key] = extractor
+        extractor.set_include_context(include_context)
 
     extractor = DigMultiplexingLandmarkExtractor()
     extractor.set_extractors(extractors)
     extractor.set_selector_function(selector_function)
     extractor.set_metadata({"extractor": "landmark"})
+    extractor.set_include_context(include_context)
     extractor_processor = ExtractorProcessor()\
         .set_extractor(extractor)\
         .set_input_fields(input_fields)\
@@ -32,12 +35,14 @@ def get_multiplexing_landmark_extractor_processor(rule_sets,
 
 def get_landmark_extractor_processor_for_rule_set(rule_set,
                                                   input_fields,
-                                                  output_fields=None):
+                                                  output_fields=None,
+                                                  include_context=False):
     if output_fields is None:
         output_fields = rule_set.names()
     extractor = DigLandmarkExtractor()
     extractor.set_rule_set(rule_set)
     extractor.set_metadata({"extractor": "landmark"})
+    extractor.set_include_context(include_context)
     extractor_processor = ExtractorProcessor()\
         .set_extractor(extractor)\
         .set_input_fields(input_fields)\
@@ -45,13 +50,15 @@ def get_landmark_extractor_processor_for_rule_set(rule_set,
     return extractor_processor
 
 
-def get_landmark_extractor_processors(rule_set, input_fields):
+def get_landmark_extractor_processors(rule_set, input_fields,
+                                      include_context=False):
     extractor_processors = list()
     for rule in rule_set.rules:
         output_field = rule.name
         extractor = DigLandmarkExtractor()
         extractor.set_rule(rule)
         extractor.set_metadata({"extractor": "landmark"})
+        extractor.set_include_context(include_context)
         extractor_processor = ExtractorProcessor()\
             .set_extractor(extractor)\
             .set_input_fields(input_fields)\

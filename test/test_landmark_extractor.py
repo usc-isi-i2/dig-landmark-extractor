@@ -47,7 +47,8 @@ class TestDigLandmarkExtractor(unittest.TestCase):
             'foo').set_output_field(r.name).set_extractor(e)
 
         updated_doc = ep.extract(doc)
-        self.assertEquals(updated_doc['posting_date'][0]['value'],
+
+        self.assertEquals(updated_doc['posting_date'][0]['result']['value'],
                           '2016-09-07 5:57pm')
 
     def test_many_dig_landmark_extractor(self):
@@ -58,9 +59,10 @@ class TestDigLandmarkExtractor(unittest.TestCase):
 
         eps = get_landmark_extractor_processors(RuleSet(rules), "foo")
         updated_doc = execute_processor_chain(doc, eps)
-        self.assertEquals(updated_doc['posting_date-1'][0]['value'],
+
+        self.assertEquals(updated_doc['posting_date-1'][0]['result']['value'],
                           '2016-09-07 5:57pm')
-        self.assertEquals(updated_doc['location-2'][0]['value'], 'Bend')
+        self.assertEquals(updated_doc['location-2'][0]['result']['value'], 'Bend')
 
     def test_dig_landmark_extractor_rule_set(self):
         rules = self.load_json_file("craigslist_rules.json")
@@ -71,9 +73,10 @@ class TestDigLandmarkExtractor(unittest.TestCase):
         ep = get_landmark_extractor_processor_for_rule_set(RuleSet(rules),
                                                            "foo")
         updated_doc = execute_processor_chain(doc, [ep])
-        self.assertEquals(updated_doc['posting_date-1'][0]['value'],
+
+        self.assertEquals(updated_doc['posting_date-1'][0]['result']['value'],
                           '2016-09-07 5:57pm')
-        self.assertEquals(updated_doc['location-2'][0]['value'], 'Bend')
+        self.assertEquals(updated_doc['location-2'][0]['result']['value'], 'Bend')
 
     def test_dig_landmark_extractor_rule_set_renamed(self):
         rules = self.load_json_file("craigslist_rules.json")
@@ -87,15 +90,16 @@ class TestDigLandmarkExtractor(unittest.TestCase):
                                                            "foo",
                                                            output_fields)
         updated_doc = execute_processor_chain(doc, [ep])
-        self.assertEquals(updated_doc['date'][0]['value'],
+
+        self.assertEquals(updated_doc['date'][0]['result']['value'],
                           '2016-09-07 5:57pm')
         self.assertEquals(updated_doc['date'][0]['original_output_field'],
                           'posting_date-1')
         self.assertEquals(len(updated_doc['date']), 1)
-        self.assertEquals(updated_doc['location'][0]['value'], 'bend &gt;')
+        self.assertEquals(updated_doc['location'][0]['result']['value'], 'bend &gt;')
         self.assertEquals(updated_doc['location'][0]['original_output_field'],
                           'location-1')
-        self.assertEquals(updated_doc['location'][1]['value'], 'Bend')
+        self.assertEquals(updated_doc['location'][1]['result']['value'], 'Bend')
         self.assertEquals(updated_doc['location'][1]['original_output_field'],
                           'location-2')
 
@@ -115,10 +119,43 @@ class TestDigLandmarkExtractor(unittest.TestCase):
         updated_doc1 = execute_processor_chain(doc1, [ep])
         updated_doc2 = execute_processor_chain(doc2, [ep])
 
-        self.assertEquals(updated_doc1['posting_date_org'][0]['value'],
+        self.assertEquals(updated_doc1['posting_date_org'][0]['result']['value'],
                           '2016-09-07 5:57pm')
-        self.assertEquals(updated_doc2['posting_date_com'][0]['value'],
+        self.assertEquals(updated_doc2['posting_date_com'][0]['result']['value'],
                           '2016-09-07 5:57pm')
+
+    def test_context_dig_multiplexing_landmark_extractor(self):
+        rules = self.load_json_file("tld_craigslist_rules.json")
+        html = self.load_file("craigslist_ad.html")
+
+        rule_sets = dict()
+        for key, value in rules.iteritems():
+            rule_sets[key] = RuleSet(value)
+
+        doc1 = {"foo": html, "url": "http://bend.craigslist.org/snw/5771300137.html"}
+        doc2 = {"foo": html, "url": "http://bend.craigslist.com/snw/5771300137.html"}
+        # extract with context
+        ep = get_multiplexing_landmark_extractor_processor(rule_sets,
+                                                           ['foo', 'url'],
+                                                           extract_domain_and_suffix,
+                                                           None,
+                                                           True)
+        updated_doc_with_context1 = execute_processor_chain(doc1, [ep])
+        updated_doc_with_context2 = execute_processor_chain(doc2, [ep])
+
+        self.assertEquals(updated_doc_with_context1['posting_date_org'][0]['result']['value'],
+                          '2016-09-07 5:57pm')
+        self.assertEquals(updated_doc_with_context1['posting_date_org'][0]['result']['context']['start'],
+                          16403)
+        self.assertEquals(updated_doc_with_context1['posting_date_org'][0]['result']['context']['end'],
+                          16421)
+        self.assertEquals(updated_doc_with_context2['posting_date_com'][0]['result']['value'],
+                          '2016-09-07 5:57pm')
+        self.assertEquals(updated_doc_with_context2['posting_date_com'][0]['result']['context']['start'],
+                          16403)
+        self.assertEquals(updated_doc_with_context2['posting_date_com'][0]['result']['context']['end'],
+                          16421)
+
 
 
 if __name__ == '__main__':

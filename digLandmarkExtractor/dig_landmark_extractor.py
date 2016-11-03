@@ -5,7 +5,6 @@ import copy
 
 from digExtractor.extractor import Extractor
 from landmark_extractor.extraction.Landmark import Rule, RuleSet
-from landmark_extractor.extraction.Landmark import flattenResult
 
 
 class DigLandmarkExtractor(Extractor):
@@ -33,18 +32,50 @@ class DigLandmarkExtractor(Extractor):
         self.rule_set = rule_set
         return self
 
+
+    def flattenResult(self, extraction_object, name = 'root'):
+        result = {}
+        if isinstance(extraction_object, dict):
+            if 'sub_rules' in extraction_object:
+                for item in extraction_object['sub_rules']:
+                    result[item] = self.flattenResult(extraction_object['sub_rules'][item], item)
+            elif 'sequence' in extraction_object:
+                result = self.flattenResult(extraction_object['sequence'], 'sequence')
+            elif 'extract' in extraction_object:
+                if self.get_include_context():
+                    return self.convert_result(extraction_object)
+                else:
+                    return extraction_object['extract']
+            else:
+                for extract in extraction_object:
+                    result[extract] = self.flattenResult(extraction_object[extract], extract)
+
+        if isinstance(extraction_object, list):
+            result = []
+            for extract in extraction_object:
+                result.append(self.flattenResult(extract, 'sequence'))
+        return result
+
+    def convert_result(self, result):
+        if not result['extract']:
+            return ""
+        return self.wrap_value_with_context(result['extract'],
+                                            'html',
+                                            result['begin_index'],
+                                            result['end_index'])
+
     def extract(self, doc):
         if self.rule is not None:
             html = doc['html']
             result = self.rule.apply(html)
-            result = flattenResult(result)
+            result = self.flattenResult(result)
             return result
         elif self.rule_set is not None:
             result = dict()
             html = doc['html']
             for rule in self.rule_set.rules:
                 rule_result = rule.apply(html)
-                rule_result = flattenResult(rule_result)
+                rule_result = self.flattenResult(rule_result)
                 if rule_result:
                     if rule.name not in result:
                         result[rule.name] = rule_result
