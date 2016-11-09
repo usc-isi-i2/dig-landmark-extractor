@@ -7,7 +7,8 @@ def get_multiplexing_landmark_extractor_processor(rule_sets,
                                                   input_fields,
                                                   selector_function,
                                                   output_fields=None,
-                                                  include_context=False):
+                                                  include_context=False,
+                                                  minimum_pct_rules=0.5):
     if output_fields is None:
         output_fields = set()
         for key, rule_set in rule_sets.iteritems():
@@ -18,6 +19,7 @@ def get_multiplexing_landmark_extractor_processor(rule_sets,
         extractor = DigLandmarkExtractor()
         extractor.set_rule_set(rule_set)
         extractor.set_metadata({"extractor": "landmark"})
+        extractor.set_minimum_pct_rules(minimum_pct_rules)
         extractors[key] = extractor
         extractor.set_include_context(include_context)
 
@@ -36,13 +38,15 @@ def get_multiplexing_landmark_extractor_processor(rule_sets,
 def get_landmark_extractor_processor_for_rule_set(rule_set,
                                                   input_fields,
                                                   output_fields=None,
-                                                  include_context=False):
+                                                  include_context=False,
+                                                  minimum_pct_rules=0.5):
     if output_fields is None:
         output_fields = rule_set.names()
     extractor = DigLandmarkExtractor()
     extractor.set_rule_set(rule_set)
     extractor.set_metadata({"extractor": "landmark"})
     extractor.set_include_context(include_context)
+    extractor.set_minimum_pct_rules(minimum_pct_rules)
     extractor_processor = ExtractorProcessor()\
         .set_extractor(extractor)\
         .set_input_fields(input_fields)\
@@ -51,7 +55,8 @@ def get_landmark_extractor_processor_for_rule_set(rule_set,
 
 
 def get_landmark_extractor_processors(rule_set, input_fields,
-                                      include_context=False):
+                                      include_context=False,
+                                      minimum_pct_rules=0.5):
     extractor_processors = list()
     for rule in rule_set.rules:
         output_field = rule.name
@@ -59,6 +64,7 @@ def get_landmark_extractor_processors(rule_set, input_fields,
         extractor.set_rule(rule)
         extractor.set_metadata({"extractor": "landmark"})
         extractor.set_include_context(include_context)
+        extractor.set_minimum_pct_rules(minimum_pct_rules)
         extractor_processor = ExtractorProcessor()\
             .set_extractor(extractor)\
             .set_input_fields(input_fields)\

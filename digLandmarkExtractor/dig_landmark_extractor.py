@@ -13,6 +13,14 @@ class DigLandmarkExtractor(Extractor):
         self.renamed_input_fields = 'html'
         self.rule = None
         self.rule_set = None
+        self.minimum_pct_rules = 0.5
+
+    def get_minimum_pct_rules(self):
+        self.minimum_pct_rules
+
+    def set_minimum_pct_rules(self, minimum_pct_rules):
+        self.minimum_pct_rules = minimum_pct_rules
+        return self
 
     def get_rule(self):
         return self.rule
@@ -83,6 +91,8 @@ class DigLandmarkExtractor(Extractor):
                         result[rule.name].append(rule_result)
                     else:
                         result[rule.name] = [result[rule.name], rule_result]
+            if len(result) < len(self.rule_set.rules) * self.minimum_pct_rules:
+                result = {}
 
             return result
 

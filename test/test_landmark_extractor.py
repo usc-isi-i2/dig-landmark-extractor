@@ -115,7 +115,8 @@ class TestDigLandmarkExtractor(unittest.TestCase):
         ep = get_multiplexing_landmark_extractor_processor(rule_sets,
                                                            ['foo', 'url'],
                                                            extract_domain_and_suffix,
-                                                           None)
+                                                           None, False,
+                                                           0.0)
         updated_doc1 = execute_processor_chain(doc1, [ep])
         updated_doc2 = execute_processor_chain(doc2, [ep])
 
@@ -139,7 +140,8 @@ class TestDigLandmarkExtractor(unittest.TestCase):
                                                            ['foo', 'url'],
                                                            extract_domain_and_suffix,
                                                            None,
-                                                           True)
+                                                           True,
+                                                           0.0)
         updated_doc_with_context1 = execute_processor_chain(doc1, [ep])
         updated_doc_with_context2 = execute_processor_chain(doc2, [ep])
 
