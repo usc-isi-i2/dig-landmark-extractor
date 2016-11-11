@@ -9,10 +9,9 @@ def get_multiplexing_landmark_extractor_processor(rule_sets,
                                                   output_fields=None,
                                                   include_context=False,
                                                   minimum_pct_rules=0.5):
-    if output_fields is None:
+    generate_output_fields = output_fields is None
+    if generate_output_fields:
         output_fields = set()
-        for key, rule_set in rule_sets.iteritems():
-            output_fields.update(rule_set.names())
 
     extractors = dict()
     for key, rule_set in rule_sets.iteritems():
@@ -22,6 +21,8 @@ def get_multiplexing_landmark_extractor_processor(rule_sets,
         extractor.set_minimum_pct_rules(minimum_pct_rules)
         extractors[key] = extractor
         extractor.set_include_context(include_context)
+        if generate_output_fields:
+            output_fields.update(extractor.get_trimmed_rule_names())
 
     extractor = DigMultiplexingLandmarkExtractor()
     extractor.set_extractors(extractors)
@@ -40,13 +41,13 @@ def get_landmark_extractor_processor_for_rule_set(rule_set,
                                                   output_fields=None,
                                                   include_context=False,
                                                   minimum_pct_rules=0.5):
-    if output_fields is None:
-        output_fields = rule_set.names()
     extractor = DigLandmarkExtractor()
     extractor.set_rule_set(rule_set)
     extractor.set_metadata({"extractor": "landmark"})
     extractor.set_include_context(include_context)
     extractor.set_minimum_pct_rules(minimum_pct_rules)
+    if output_fields is None:
+        output_fields = extractor.get_trimmed_rule_names()
     extractor_processor = ExtractorProcessor()\
         .set_extractor(extractor)\
         .set_input_fields(input_fields)\
@@ -59,12 +60,12 @@ def get_landmark_extractor_processors(rule_set, input_fields,
                                       minimum_pct_rules=0.5):
     extractor_processors = list()
     for rule in rule_set.rules:
-        output_field = rule.name
         extractor = DigLandmarkExtractor()
         extractor.set_rule(rule)
         extractor.set_metadata({"extractor": "landmark"})
         extractor.set_include_context(include_context)
         extractor.set_minimum_pct_rules(minimum_pct_rules)
+        output_field = extractor.get_trimmed_rule_names()
         extractor_processor = ExtractorProcessor()\
             .set_extractor(extractor)\
             .set_input_fields(input_fields)\

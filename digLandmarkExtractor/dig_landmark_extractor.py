@@ -2,12 +2,16 @@
 """Module for defining an extractor that accepts a list of tokens
 and outputs tokens that exist in a user provided trie"""
 import copy
+import json
+import re
 
 from digExtractor.extractor import Extractor
 from landmark_extractor.extraction.Landmark import Rule, RuleSet
 
 
 class DigLandmarkExtractor(Extractor):
+
+    rule_name_regex = r'-[\d]+$'
 
     def __init__(self):
         self.renamed_input_fields = 'html'
@@ -37,11 +41,19 @@ class DigLandmarkExtractor(Extractor):
     def set_rule_set(self, rule_set):
         if not isinstance(rule_set, RuleSet):
             raise ValueError("rule_set must be a RuleSet")
-        self.rule_set = rule_set
+        self.rule_set = RuleSet(json.loads(rule_set.toJson()))
+        self.rule_set.rules = [rule for rule in self.rule_set.rules
+                               if not rule.name.startswith("junk")]
         return self
 
+    def get_trimmed_rule_names(self):
+        if self.rule:
+            return re.sub(self.rule_name_regex, "", self.rule.name)
+        elif self.rule_set:
+            return [re.sub(self.rule_name_regex, "", rule.name)
+                    for rule in self.rule_set.rules]
 
-    def flattenResult(self, extraction_object, name = 'root'):
+    def flattenResult(self, extraction_object, name='root'):
         result = {}
         if isinstance(extraction_object, dict):
             if 'sub_rules' in extraction_object:
@@ -81,17 +93,22 @@ class DigLandmarkExtractor(Extractor):
         elif self.rule_set is not None:
             result = dict()
             html = doc['html']
+            hits = 0
             for rule in self.rule_set.rules:
+                rule_name_trimmed = re.sub(self.rule_name_regex,
+                                           "", rule.name)
                 rule_result = rule.apply(html)
                 rule_result = self.flattenResult(rule_result)
                 if rule_result:
-                    if rule.name not in result:
-                        result[rule.name] = rule_result
-                    elif isinstance(result[rule.name], list):
-                        result[rule.name].append(rule_result)
+                    hits += 1
+                    if rule_name_trimmed not in result:
+                        result[rule_name_trimmed] = rule_result
+                    elif isinstance(result[rule_name_trimmed], list):
+                        result[rule_name_trimmed].append(rule_result)
                     else:
-                        result[rule.name] = [result[rule.name], rule_result]
-            if len(result) < len(self.rule_set.rules) * self.minimum_pct_rules:
+                        result[rule_name_trimmed] =\
+                            [result[rule_name_trimmed], rule_result]
+            if hits < len(self.rule_set.rules) * self.minimum_pct_rules:
                 result = {}
 
             return result

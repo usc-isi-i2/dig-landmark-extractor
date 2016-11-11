@@ -1,5 +1,4 @@
 import os
-import sys
 import codecs
 
 import unittest
@@ -10,9 +9,12 @@ import tldextract
 from digLandmarkExtractor.dig_landmark_extractor import DigLandmarkExtractor
 from digExtractor.extractor_processor import ExtractorProcessor
 from landmark_extractor.extraction.Landmark import RuleSet
-from digLandmarkExtractor.get_landmark_extractor_processors import get_landmark_extractor_processors
-from digLandmarkExtractor.get_landmark_extractor_processors import get_landmark_extractor_processor_for_rule_set
-from digLandmarkExtractor.get_landmark_extractor_processors import get_multiplexing_landmark_extractor_processor
+from digLandmarkExtractor.get_landmark_extractor_processors\
+    import get_landmark_extractor_processors
+from digLandmarkExtractor.get_landmark_extractor_processors\
+    import get_landmark_extractor_processor_for_rule_set
+from digLandmarkExtractor.get_landmark_extractor_processors\
+    import get_multiplexing_landmark_extractor_processor
 from digExtractor.extractor_processor_chain import execute_processor_chain
 
 
@@ -29,8 +31,9 @@ class TestDigLandmarkExtractor(unittest.TestCase):
         return rules
 
     def load_file(self, filename):
-        with open(os.path.join(os.path.dirname(__file__), filename), 'r') as myfile:
-            data=myfile.read().replace('\n', '')
+        filepath = os.path.join(os.path.dirname(__file__), filename)
+        with open(filepath, 'r') as myfile:
+            data = myfile.read().replace('\n', '')
             return data
 
     def test_dig_landmark_extractor(self):
@@ -60,9 +63,10 @@ class TestDigLandmarkExtractor(unittest.TestCase):
         eps = get_landmark_extractor_processors(RuleSet(rules), "foo")
         updated_doc = execute_processor_chain(doc, eps)
 
-        self.assertEquals(updated_doc['posting_date-1'][0]['result']['value'],
+        self.assertEquals(updated_doc['posting_date'][0]['result']['value'],
                           '2016-09-07 5:57pm')
-        self.assertEquals(updated_doc['location-2'][0]['result']['value'], 'Bend')
+        self.assertEquals(updated_doc['location'][1][
+                          'result']['value'], 'Bend')
 
     def test_dig_landmark_extractor_rule_set(self):
         rules = self.load_json_file("craigslist_rules.json")
@@ -74,17 +78,18 @@ class TestDigLandmarkExtractor(unittest.TestCase):
                                                            "foo")
         updated_doc = execute_processor_chain(doc, [ep])
 
-        self.assertEquals(updated_doc['posting_date-1'][0]['result']['value'],
+        self.assertEquals(updated_doc['posting_date'][0]['result']['value'],
                           '2016-09-07 5:57pm')
-        self.assertEquals(updated_doc['location-2'][0]['result']['value'], 'Bend')
+        self.assertEquals(updated_doc['location'][0][
+                          'result'][1]['value'], 'Bend')
 
     def test_dig_landmark_extractor_rule_set_renamed(self):
         rules = self.load_json_file("craigslist_rules.json")
         html = self.load_file("craigslist_ad.html")
 
         doc = {"foo": html}
-        output_fields = {'posting_date-1': 'date', 'posting_date-2': 'date',
-                         'location-1': 'location', 'location-2': 'location'}
+        output_fields = {'posting_date': 'date',
+                         'location': 'new_location'}
 
         ep = get_landmark_extractor_processor_for_rule_set(RuleSet(rules),
                                                            "foo",
@@ -94,15 +99,15 @@ class TestDigLandmarkExtractor(unittest.TestCase):
         self.assertEquals(updated_doc['date'][0]['result']['value'],
                           '2016-09-07 5:57pm')
         self.assertEquals(updated_doc['date'][0]['original_output_field'],
-                          'posting_date-1')
+                          'posting_date')
         self.assertEquals(len(updated_doc['date']), 1)
-        self.assertEquals(updated_doc['location'][0]['result']['value'], 'bend &gt;')
-        self.assertEquals(updated_doc['location'][0]['original_output_field'],
-                          'location-1')
-        self.assertEquals(updated_doc['location'][1]['result']['value'], 'Bend')
-        self.assertEquals(updated_doc['location'][1]['original_output_field'],
-                          'location-2')
-
+        new_location1 = updated_doc['new_location'][0]
+        self.assertEquals(new_location1['result'][0]['value'], 'bend &gt;')
+        self.assertEquals(new_location1['original_output_field'],
+                          'location')
+        self.assertEquals(new_location1['result'][1]['value'], 'Bend')
+        self.assertEquals(new_location1['original_output_field'],
+                          'location')
 
     def test_dig_multiplexing_landmark_extractor(self):
         rules = self.load_json_file("tld_craigslist_rules.json")
@@ -157,7 +162,6 @@ class TestDigLandmarkExtractor(unittest.TestCase):
                           16403)
         self.assertEquals(updated_doc_with_context2['posting_date_com'][0]['result']['context']['end'],
                           16421)
-
 
 
 if __name__ == '__main__':

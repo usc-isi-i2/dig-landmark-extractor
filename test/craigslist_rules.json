@@ -57,5 +57,15 @@
       "include_end_regex": true,
       "visible_chunk_before": "posted",
       "name": "posting_date-2"
+    },
+    {
+      "rule_type": "ItemRule",
+      "removehtml": true,
+      "strip_end_regex": "postinginfo\"\\>\\<a\\s+href",
+      "begin_regex": "class=\"postinginfo\\s+reveal\"\\>posted",
+      "end_regex": "postinginfo\"\\>\\<a\\s+href",
+      "include_end_regex": true,
+      "visible_chunk_before": "posted",
+      "name": "junk-2"
     }
 ]
