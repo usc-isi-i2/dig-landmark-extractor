@@ -44,10 +44,14 @@ def get_landmark_extractor_processor_for_rule_set(rule_set,
                                                   input_fields,
                                                   output_fields=None,
                                                   include_context=False,
-                                                  minimum_pct_rules=0.5):
+                                                  minimum_pct_rules=0.5,
+                                                  metadata=None):
     extractor = DigLandmarkExtractor()
     extractor.set_rule_set(rule_set)
-    extractor.set_metadata({"extractor": "landmark"})
+    if metadata:
+        extractor.set_metadata(metadata)
+    else:
+        extractor.set_metadata({"extractor": "landmark"})
     extractor.set_include_context(include_context)
     extractor.set_minimum_pct_rules(minimum_pct_rules)
     if output_fields is None:
@@ -61,12 +65,16 @@ def get_landmark_extractor_processor_for_rule_set(rule_set,
 
 def get_landmark_extractor_processors(rule_set, input_fields,
                                       include_context=False,
-                                      minimum_pct_rules=0.5):
+                                      minimum_pct_rules=0.5,
+                                      metadata=None):
     extractor_processors = list()
     for rule in rule_set.rules:
         extractor = DigLandmarkExtractor()
         extractor.set_rule(rule)
-        extractor.set_metadata({"extractor": "landmark"})
+        if metadata:
+            extractor.set_metadata(metadata)
+        else:
+            extractor.set_metadata({"extractor": "landmark"})
         extractor.set_include_context(include_context)
         extractor.set_minimum_pct_rules(minimum_pct_rules)
         output_field = extractor.get_trimmed_rule_names()
