@@ -8,7 +8,8 @@ def get_multiplexing_landmark_extractor_processor(rule_sets,
                                                   selector_function,
                                                   output_fields=None,
                                                   include_context=False,
-                                                  minimum_pct_rules=0.5):
+                                                  minimum_pct_rules=0.5,
+                                                  metadata=None):
     generate_output_fields = output_fields is None
     if generate_output_fields:
         output_fields = set()
@@ -17,7 +18,10 @@ def get_multiplexing_landmark_extractor_processor(rule_sets,
     for key, rule_set in rule_sets.iteritems():
         extractor = DigLandmarkExtractor()
         extractor.set_rule_set(rule_set)
-        extractor.set_metadata({"extractor": "landmark"})
+        if metadata:
+            extractor.set_metadata(metadata)
+        else:
+            extractor.set_metadata({"extractor": "landmark"})
         extractor.set_minimum_pct_rules(minimum_pct_rules)
         extractors[key] = extractor
         extractor.set_include_context(include_context)
